@@ -8,6 +8,10 @@
 			"Name": "TPSGame",
 			"Type": "Runtime",
 			"LoadingPhase": "Default"
+		},
+		{
+			"Name": "Utility",
+			"Type": "Runtime"
 		}
 	],
 	"Plugins": [

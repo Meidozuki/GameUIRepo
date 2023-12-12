@@ -7,7 +7,17 @@ public class TPSGame : ModuleRules
 	public TPSGame(ReadOnlyTargetRules Target) : base(Target)
 	{
 		PCHUsage = PCHUsageMode.UseExplicitOrSharedPCHs;
+		
+		CppStandard = CppStandardVersion.Cpp20;
 
-		PublicDependencyModuleNames.AddRange(new string[] { "Core", "CoreUObject", "Engine", "InputCore", "EnhancedInput" });
+		PublicDependencyModuleNames.AddRange(new string[]
+		{
+			"Core", "CoreUObject", "Engine", "InputCore", "EnhancedInput"
+		});
+		
+		PrivateDependencyModuleNames.AddRange(new string[]
+		{
+			"Utility"
+		});
 	}
 }
