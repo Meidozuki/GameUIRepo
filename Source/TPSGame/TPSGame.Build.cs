@@ -17,7 +17,7 @@ public class TPSGame : ModuleRules
 		
 		PrivateDependencyModuleNames.AddRange(new string[]
 		{
-			"Utility"
+			"Utility", "NavigationSystem", "AIModule", "Niagara"
 		});
 	}
 }
