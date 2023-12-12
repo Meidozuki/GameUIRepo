@@ -19,5 +19,10 @@ public class TPSGame : ModuleRules
 		{
 			"Utility", "NavigationSystem", "AIModule", "Niagara"
 		});
+		
+		PrivateIncludePaths.AddRange(new string[]
+		{
+			ModuleDirectory
+		});
 	}
 }

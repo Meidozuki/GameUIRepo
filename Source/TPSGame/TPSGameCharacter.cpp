@@ -10,6 +10,7 @@
 #include "EnhancedInputComponent.h"
 #include "EnhancedInputSubsystems.h"
 #include "InputActionValue.h"
+#include "QuickLog.h"
 
 DEFINE_LOG_CATEGORY(LogTemplateCharacter);
 
@@ -58,6 +59,7 @@ void ATPSGameCharacter::BeginPlay()
 {
 	// Call the base class  
 	Super::BeginPlay();
+	LOGDEBUG(TEXT("begin play"));
 
 	//Add Input Mapping Context
 	if (APlayerController* PlayerController = Cast<APlayerController>(Controller))
