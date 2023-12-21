@@ -11,7 +11,8 @@
 		},
 		{
 			"Name": "Utility",
-			"Type": "Runtime"
+			"Type": "Runtime",
+			"LoadingPhase": "Default"
 		}
 	],
 	"Plugins": [
