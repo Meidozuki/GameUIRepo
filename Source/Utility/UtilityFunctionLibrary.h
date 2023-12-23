@@ -14,7 +14,4 @@ class UTILITY_API UUtilityFunctionLibrary : public UObject
 {
 	GENERATED_BODY()
 public:
-
-	UFUNCTION(BlueprintCallable)
-	static float LerpAlpha(float OldVal, float NewVal, float Alpha);
 };
