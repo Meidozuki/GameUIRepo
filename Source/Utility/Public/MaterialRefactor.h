@@ -6,6 +6,27 @@
 #include "GameFramework/Actor.h"
 #include "MaterialRefactor.generated.h"
 
+
+// MaterialInstanceDynamic.h
+
+// DECLARE_MULTICAST_DELEGATE_OneParam(FPostMaterialInstanceDynamicCreateSignature, UMaterialInstanceDynamic*);
+// UCLASS(hidecategories=Object, collapsecategories, BlueprintType)
+// class ENGINE_API UMaterialInstanceDynamic : public UMaterialInstance{
+// 	GENERATED_UCLASS_BODY()
+//
+// 	/**
+// 	 * Create a material instance dynamic parented to the specified material.
+// 	 */
+// 	static UMaterialInstanceDynamic* Create(class UMaterialInterface* ParentMaterial, class UObject* InOuter);
+// 	
+// 	static FPostMaterialInstanceDynamicCreateSignature PostMIDCreate;
+//
+// 	// ...
+// };
+
+
+
+
 UCLASS()
 class AMaterialRefactor : public AActor
 {
@@ -23,16 +44,11 @@ public:
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
 	
-	UFUNCTION(BlueprintCallable)
+	// UFUNCTION(BlueprintCallable)
 	static void ForceUpdateMIParam(UMaterialInstance* MI, FName ParamName, float NewValue);
-	
-	UFUNCTION(BlueprintCallable)
-	void UpdateMaterialSlotScalarParamater(FName InSlotName, FName InParamName, float ScalarVal);
 
 	UFUNCTION(BlueprintCallable)
 	static void CopyParamater(const UStaticMeshComponent* From, UStaticMeshComponent* To);
 	
-	UFUNCTION(BlueprintCallable)
-	void FindMaterialChild(UMaterialInterface *MaterialInterface);
 	
 };

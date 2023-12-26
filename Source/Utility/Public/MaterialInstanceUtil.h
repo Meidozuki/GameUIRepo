@@ -32,18 +32,6 @@ public:
 	void PurgeParameters(UMaterialInterface* OriginalMaterial, bool bOverridenOnly=true, bool bCurrentOnly=false);
 };
 
-USTRUCT()
-struct FMaterialParameterHelper
-{
-	GENERATED_BODY()
-
-	static void ViewScalarParameters(TArray<FScalarParameterValue> const& ScalarParameterValues);
-	static void ViewScalarParameters(UMaterialInstance* MaterialInstance);
-	
-	// Find whether current material (instance) have the parameter named ParamName
-	static bool FindParameterByNameGeneral(UMaterialInterface* MaterialInterface, const FName& ParamName);
-};
-
 // Used for replacing newly created UMaterialInstanceDynamic's parameters
 UCLASS()
 class UHotReloadMIDProxy final: public UObject
@@ -67,21 +55,14 @@ class UMaterialInstanceUtil : public UBlueprintFunctionLibrary
 	GENERATED_BODY()
 	
 public:
+#pragma region helpers
+	static void ViewScalarParameters(TArray<FScalarParameterValue> const& ScalarParameterValues);
+	static void ViewScalarParameters(UMaterialInstance* MaterialInstance);
 	
-	UFUNCTION(BlueprintCallable)
-	static void ViewScalarParameters(UMaterialInstance* MaterialInstance)
-	{
-		FMaterialParameterHelper::ViewScalarParameters(MaterialInstance);
-	}
+	// Find whether current material (instance) have the parameter named ParamName
+	static bool FindParameterByNameGeneral(UMaterialInterface* MaterialInterface, const FName& ParamName);
+#pragma endregion 
 	
-	static TArray<UMaterialInstanceDynamic*> CollectMaterialInstanceDynamics();
-
-	/** Default: Find the same MIs, or MIDs from Base
-	 * 仅会返回当前可以处理的情况
-	 * 现在为，相同MIC或者MIC派生的MID
-	 */
-	UFUNCTION(BlueprintCallable)
-	static bool IsMaterialInstanceDerivedFrom(UMaterialInterface* Derived, UMaterialInterface* Base, bool bAffectChildren = false);
 	
 	
 	UFUNCTION(BlueprintCallable)
@@ -95,12 +76,12 @@ public:
 		BatchUpdateMIDScalarParam(CollectMaterialInstanceDynamics(), UpdateInfo, ParentConstraint);
 	}
 	
-	// UFUNCTION(BlueprintCallable)
-	// static bool FindParameterByNameGeneral(UMaterialInterface* MaterialInterface, const FName& ParamName)
-	// {
-	// 	return FMaterialParameterHelper::FindParameterByNameGeneral(MaterialInterface, ParamName);
-	// }
+	static TArray<UMaterialInstanceDynamic*> CollectMaterialInstanceDynamics();
 
+	/** Default: Find the same MIs, or MIDs from Base
+	 */
+	UFUNCTION(BlueprintCallable)
+	static bool IsMaterialInstanceDerivedFrom(UMaterialInterface* Derived, UMaterialInterface* Base, bool bAffectChildren = false);
 	
 	UFUNCTION(BlueprintCallable)
 	static bool IsMIDDerivedFrom(UMaterialInterface* Derived, UMaterialInterface* Base);

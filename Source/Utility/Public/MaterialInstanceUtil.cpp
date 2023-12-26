@@ -28,7 +28,7 @@ void FMaterialInstanceUpdateInfo::PurgeParameters(UMaterialInterface* OriginalMa
 		if (bVerbose)
 		{
 			UE_LOG(LogTemp, Display, TEXT("Before parameter purge:"));
-			FMaterialParameterHelper::ViewScalarParameters(ScalarParameterValues);
+			UMaterialInstanceUtil::ViewScalarParameters(ScalarParameterValues);
 		}
 		auto *MI = Cast<UMaterialInstance>(OriginalMaterial);
 		TArray<int> DeleteIdx;
@@ -37,7 +37,7 @@ void FMaterialInstanceUpdateInfo::PurgeParameters(UMaterialInterface* OriginalMa
 			auto &Ref = ScalarParameterValues[i];
 			if (bCurrentOnly)
 			{
-				if (!FMaterialParameterHelper::FindParameterByNameGeneral(OriginalMaterial, Ref.ParameterInfo.Name))
+				if (!UMaterialInstanceUtil::FindParameterByNameGeneral(OriginalMaterial, Ref.ParameterInfo.Name))
 				{
 					DeleteIdx.Insert(i, 0);
 				}
@@ -61,60 +61,8 @@ void FMaterialInstanceUpdateInfo::PurgeParameters(UMaterialInterface* OriginalMa
 		if (bVerbose)
 		{
 			UE_LOG(LogTemp, Display, TEXT("After parameter purge:"));
-			FMaterialParameterHelper::ViewScalarParameters(ScalarParameterValues);
+			UMaterialInstanceUtil::ViewScalarParameters(ScalarParameterValues);
 		}
-	}
-}
-
-void FMaterialParameterHelper::ViewScalarParameters(TArray<FScalarParameterValue> const& ScalarParameterValues)
-{
-	for (auto &Param: ScalarParameterValues)
-	{
-		UE_LOG(LogTemp, Display, TEXT("[FMaterialParameterHelper]Scalar params: %s %f"), *Param.ParameterInfo.Name.ToString(), Param.ParameterValue);
-	}
-	UE_LOG(LogTemp, Display, TEXT("[FMaterialParameterHelper]Scalar params array end."));
-}
-
-void FMaterialParameterHelper::ViewScalarParameters(UMaterialInstance* MaterialInstance)
-{
-	if (IsValid(MaterialInstance))
-	{
-		ViewScalarParameters(MaterialInstance->ScalarParameterValues);
-	}
-}
-
-template <typename ParameterType>
-const ParameterType* FindParameterByName(const TArray<ParameterType>& Parameters, const FHashedMaterialParameterInfo& ParameterInfo)
-{
-	// Copied from engine
-	for (int32 ParameterIndex = 0; ParameterIndex < Parameters.Num(); ParameterIndex++)
-	{
-		const ParameterType* Parameter = &Parameters[ParameterIndex];
-		if (Parameter->ParameterInfo == ParameterInfo)
-		{
-			return Parameter;
-		}
-	}
-	return nullptr;
-}
-
-bool FMaterialParameterHelper::FindParameterByNameGeneral(UMaterialInterface* MaterialInterface, const FName& ParamName)
-{
-	if (!IsValid(MaterialInterface))
-	{
-		return false;
-	}
-
-	if (MaterialInterface->IsA<UMaterialInstance>())
-	{
-		auto *MaterialInstance = Cast<UMaterialInstance>(MaterialInterface);
-		return FindParameterByName(MaterialInstance->ScalarParameterValues, ParamName) != nullptr;
-	}
-	else
-	{
-		auto *Material = Cast<UMaterial>(MaterialInterface);
-		float temp;
-		return Material->GetScalarParameterValue(ParamName, temp, false);
 	}
 }
 
@@ -149,6 +97,58 @@ void UHotReloadMIDProxy::RegisterMIDCreateDelegate()
 	// }
 }
 
+void UMaterialInstanceUtil::ViewScalarParameters(TArray<FScalarParameterValue> const& ScalarParameterValues)
+{
+	for (auto &Param: ScalarParameterValues)
+	{
+		UE_LOG(LogTemp, Display, TEXT("[UMaterialInstanceUtil]Scalar params: %s %f"), *Param.ParameterInfo.Name.ToString(), Param.ParameterValue);
+	}
+	UE_LOG(LogTemp, Display, TEXT("[UMaterialInstanceUtil]Scalar params array end."));
+}
+
+void UMaterialInstanceUtil::ViewScalarParameters(UMaterialInstance* MaterialInstance)
+{
+	if (IsValid(MaterialInstance))
+	{
+		ViewScalarParameters(MaterialInstance->ScalarParameterValues);
+	}
+}
+
+template <typename ParameterType>
+const ParameterType* FindParameterByName(const TArray<ParameterType>& Parameters, const FHashedMaterialParameterInfo& ParameterInfo)
+{
+	// Copied from engine
+	for (int32 ParameterIndex = 0; ParameterIndex < Parameters.Num(); ParameterIndex++)
+	{
+		const ParameterType* Parameter = &Parameters[ParameterIndex];
+		if (Parameter->ParameterInfo == ParameterInfo)
+		{
+			return Parameter;
+		}
+	}
+	return nullptr;
+}
+
+bool UMaterialInstanceUtil::FindParameterByNameGeneral(UMaterialInterface* MaterialInterface, const FName& ParamName)
+{
+	if (!IsValid(MaterialInterface))
+	{
+		return false;
+	}
+
+	if (MaterialInterface->IsA<UMaterialInstance>())
+	{
+		auto *MaterialInstance = Cast<UMaterialInstance>(MaterialInterface);
+		return FindParameterByName(MaterialInstance->ScalarParameterValues, ParamName) != nullptr;
+	}
+	else
+	{
+		auto *Material = Cast<UMaterial>(MaterialInterface);
+		float temp;
+		return Material->GetScalarParameterValue(ParamName, temp, false);
+	}
+}
+
 TArray<UMaterialInstanceDynamic*> UMaterialInstanceUtil::CollectMaterialInstanceDynamics()
 {
 	TArray<UMaterialInstanceDynamic*> Res;
@@ -162,7 +162,6 @@ TArray<UMaterialInstanceDynamic*> UMaterialInstanceUtil::CollectMaterialInstance
 bool UMaterialInstanceUtil::IsMaterialInstanceDerivedFrom(UMaterialInterface* Derived, UMaterialInterface* Base,
                                                           bool bAffectChildren)
 {
-	constexpr bool verbose = true;
 	if (Base == nullptr || Derived == nullptr)
 	{
 		return false;
@@ -226,7 +225,7 @@ bool UMaterialInstanceUtil::IsMIDDerivedFrom(UMaterialInterface* Derived, UMater
 		return false;
 	}
 
-	auto *MI = Derived;
+	UMaterialInterface *MI = Derived;
 	while (MI->IsA<UMaterialInstance>())
 	{
 		if (MI == Base)
@@ -358,7 +357,7 @@ bool UMaterialInstanceUtil::IsParameterInheritedFrom(const FName& ParamName, UMa
 		MI != nullptr && MI != MITop; )
 	{
 		// 如果Bottom到Top中间有其他值覆盖，则Top不会影响到Bottom
-		bool found = FMaterialParameterHelper::FindParameterByNameGeneral(MI, ParamName);
+		bool found = FindParameterByNameGeneral(MI, ParamName);
 #if WITH_DEV_AUTOMATION_TESTS
 		UE_LOG(LogTemp, Log, TEXT("%s found param %s: %d"), *MI->GetName(), *ParamName.ToString(), int(found));
 #endif
@@ -371,7 +370,7 @@ bool UMaterialInstanceUtil::IsParameterInheritedFrom(const FName& ParamName, UMa
 		MI = Cast<UMaterialInstance>(MI->Parent);
 	}
 
-	return flag && IsMIDDerivedFrom(MIBottom, MITop) && MITop->GetScalarParameterValue(ParamName, temp);
+	return flag && IsMaterialInstanceDerivedFrom(MIBottom, MITop,true) && MITop->GetScalarParameterValue(ParamName, temp);
 }
 
 
