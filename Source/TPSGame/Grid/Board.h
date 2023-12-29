@@ -4,22 +4,31 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
+#include "Components/BoxComponent.h"
 #include "Board.generated.h"
 
-UCLASS()
+UCLASS(Blueprintable)
 class TPSGAME_API ABoard : public AActor
 {
 	GENERATED_BODY()
-
 public:
-	// Sets default values for this actor's properties
-	ABoard();
+	UPROPERTY(BlueprintReadOnly)
+	UBoxComponent* Box;
+
+	UPROPERTY(BlueprintReadWrite, EditAnywhere, meta=(ClampMin="0.01"))
+	FVector2f GridRange;
+
+	UPROPERTY(BlueprintReadWrite, EditAnywhere)
+	UStaticMesh* GridMesh = nullptr;
+private:
+	static FVector2f GetGridSize();
 
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
 
 public:
+	ABoard();
 
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
@@ -29,4 +38,6 @@ public:
 	
 	UFUNCTION(BlueprintCallable)
 	FVector AlignGridLocation(FVector InLocation) const;
+
+	
 };
