@@ -3,10 +3,12 @@
 
 #include "Board.h"
 
-#include "BasicGrid.h"
 #include "Math/UnrealMathUtility.h"
+#include "DrawDebugHelpers.h"
 
-#include "Config/GlobalConfigLibrary.h"
+#include "BasicGrid.h"
+#include "QuickLog.h"
+#include "Board2DComponent.h"
 
 
 // Sets default values
@@ -18,71 +20,38 @@ ABoard::ABoard()
 	Box = CreateDefaultSubobject<UBoxComponent>(TEXT("Box"));
 	SetRootComponent(Box);
 
-	GridRange = {400, 400};
+	Board2D = CreateDefaultSubobject<UBoard2DComponent>("Board2D");
+	Board2D->GridRange = {400, 400};
 }
 
-inline float ReadGridSize(FName Name)
-{
-	float temp = UGlobalConfigLibrary::ReadFloatConfigChecked(Name);
-	return temp != 0.f ? temp : 1.f;
-}
-
-FVector2f ABoard::GetGridSize()
-{
-	static float GridX = ReadGridSize(TEXT("GridSizeX"));
-	static float GridY = ReadGridSize(TEXT("GridSizeY"));
-	return {GridX, GridY};
-}
 
 // Called when the game starts or when spawned
 void ABoard::BeginPlay()
 {
 	Super::BeginPlay();
+	
+	UE_LOG(LogTemp, Display,TEXT("Board actor begin play"));
 
 	FVector Extent = Box->GetUnscaledBoxExtent();
-	FVector2f Ratio = GridRange / FVector2f(Extent.X, Extent.Y);
-	SetActorScale3D(FVector(Ratio.X, Ratio.Y, 1.0f));
-	const auto X = GetActorLocation().X;
+	FVector2f Ratio = Board2D->GridRange / FVector2f(Extent.X, Extent.Y);
+	SetActorScale3D(RotateXYToScreen({ Ratio.X, Ratio.Y, 0.5f }));
 
-	for (float i = 0; i < 10; ++i)
-	{
-		for (int j = 0; j < 10; ++j)
-		{
-			auto *Actor = GetWorld()->SpawnActor<ABasicGrid>(FVector(X, j, i), {});
-			Actor->StaticMeshComponent->SetStaticMesh(GridMesh);
-		}
-	}
+	FVector Location = GetActorLocation();
+	LOGDEBUG(TEXT("Draw At %s, Extent %s"), *Location.ToString(), *Box->GetScaledBoxExtent().ToString());
+	DrawDebugBox(GetWorld(), Location, Box->GetScaledBoxExtent(), FColor::Red, true);
+
+
+	const auto PosX = Location.X;
+	// ForEachGrid([PosX, this](float i, float j) {
+	// 	auto* Actor = this->GetWorld()->SpawnActor<ABasicGrid>(FVector(PosX, j, i), {});
+	// 	Actor->StaticMeshComponent->SetStaticMesh(this->GridMesh);
+	// 	});
+
 }
 
 // Called every frame
 void ABoard::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
-}
-
-bool ABoard::IsInBoard(FVector InLocation) const
-{
-	auto &&Location = GetActorLocation();
-	FVector2f XY(Location.X, Location.Y);
-	
-	auto &&Half = GridRange / 2;
-	const auto RangeBegin = XY - Half;
-	const auto RangeEnd = XY + Half;
-	
-	return XY.ComponentwiseAllGreaterThan(RangeBegin) && XY.ComponentwiseAllLessThan(RangeEnd);
-}
-
-
-FVector ABoard::AlignGridLocation(FVector InLocation) const
-{
-	auto temp = GetGridSize();
-	float GridX = temp.X, GridY = temp.Y;
-	
-	// Use RoundTo other than SnapGrid to enable Unreal's SSE
-	return FVector(
-		FMath::RoundToInt(InLocation.X / GridX) * GridX,
-		FMath::RoundToInt(InLocation.Y / GridY) * GridY,
-		InLocation.Z
-	);
 }
 

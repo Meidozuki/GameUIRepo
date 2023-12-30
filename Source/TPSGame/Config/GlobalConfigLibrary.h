@@ -23,7 +23,7 @@ public:
 	static inline float ReadFloatConfigChecked(FName Name);
 };
 
-float UGlobalConfigLibrary::ReadFloatConfigChecked(FName Name)
+inline float UGlobalConfigLibrary::ReadFloatConfigChecked(FName Name)
 {
 	FOptionalFloat Res = ReadFloatConfig(Name);
 	ensure(Res.Valid);

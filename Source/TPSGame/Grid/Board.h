@@ -7,6 +7,16 @@
 #include "Components/BoxComponent.h"
 #include "Board.generated.h"
 
+
+class UBoard2DComponent;
+
+inline FVector RotateXYToScreen(const FVector& InVector) {
+	return FVector(InVector.Z, InVector.X, InVector.Y);
+}
+
+/**
+ * All public function return XY plane
+ */
 UCLASS(Blueprintable)
 class TPSGAME_API ABoard : public AActor
 {
@@ -15,13 +25,11 @@ public:
 	UPROPERTY(BlueprintReadOnly)
 	UBoxComponent* Box;
 
-	UPROPERTY(BlueprintReadWrite, EditAnywhere, meta=(ClampMin="0.01"))
-	FVector2f GridRange;
-
 	UPROPERTY(BlueprintReadWrite, EditAnywhere)
 	UStaticMesh* GridMesh = nullptr;
-private:
-	static FVector2f GetGridSize();
+
+	UPROPERTY()
+	UBoard2DComponent* Board2D;
 
 protected:
 	// Called when the game starts or when spawned
@@ -33,11 +41,6 @@ public:
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
 
-	UFUNCTION(BlueprintCallable)
-	bool IsInBoard(FVector InLocation) const;
-	
-	UFUNCTION(BlueprintCallable)
-	FVector AlignGridLocation(FVector InLocation) const;
 
 	
 };
