@@ -8,11 +8,8 @@
 #include "Board.generated.h"
 
 
+class ABasicGrid;
 class UBoard2DComponent;
-
-inline FVector RotateXYToScreen(const FVector& InVector) {
-	return FVector(InVector.Z, InVector.X, InVector.Y);
-}
 
 /**
  * All public function return XY plane
@@ -28,7 +25,10 @@ public:
 	UPROPERTY(BlueprintReadWrite, EditAnywhere)
 	UStaticMesh* GridMesh = nullptr;
 
-	UPROPERTY()
+	UPROPERTY(BlueprintReadWrite, EditAnywhere)
+	TSubclassOf<AActor> GridType = nullptr;
+
+	UPROPERTY(BlueprintReadOnly, VisibleAnywhere)
 	UBoard2DComponent* Board2D;
 
 protected:

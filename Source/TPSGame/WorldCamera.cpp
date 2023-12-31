@@ -52,7 +52,6 @@ void AWorldCamera::SetupPlayerInputComponent(UInputComponent* PlayerInputCompone
 
 void AWorldCamera::CameraMove(const FInputActionValue& Value)
 {
-	LOG(TEXT("Triggered"));
 	FVector Vector = Value.Get<FVector>();
 	Vector *= CameraMoveVelocity;
 

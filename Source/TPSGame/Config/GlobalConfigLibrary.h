@@ -9,6 +9,9 @@
 #include "GlobalConfigLibrary.generated.h"
 
 
+UENUM()
+enum class EGridAlignAxis { AxisX, AxisY, AxisZ };
+
 
 UCLASS()
 class TPSGAME_API UGlobalConfigLibrary : public UBlueprintFunctionLibrary
@@ -16,6 +19,9 @@ class TPSGAME_API UGlobalConfigLibrary : public UBlueprintFunctionLibrary
 	GENERATED_BODY()
 private:
 public:
+	UFUNCTION(BlueprintPure)
+	static EGridAlignAxis GetAlignAxis() { return EGridAlignAxis::AxisX;}
+	
 	UFUNCTION(BlueprintPure)
 	static FOptionalFloat ReadFloatConfig(FName Name);
 	

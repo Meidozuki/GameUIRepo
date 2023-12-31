@@ -9,7 +9,7 @@
 #include "BasicGrid.h"
 #include "QuickLog.h"
 #include "Board2DComponent.h"
-
+#include "UtilFuncLibrary.h"
 
 // Sets default values
 ABoard::ABoard()
@@ -34,18 +34,25 @@ void ABoard::BeginPlay()
 
 	FVector Extent = Box->GetUnscaledBoxExtent();
 	FVector2f Ratio = Board2D->GridRange / FVector2f(Extent.X, Extent.Y);
-	SetActorScale3D(RotateXYToScreen({ Ratio.X, Ratio.Y, 0.5f }));
+	SetActorScale3D(UUtilityFunctionLibrary::RotateXYToScreenSpace({ Ratio.X, Ratio.Y, 0.5f }));
 
 	FVector Location = GetActorLocation();
-	LOGDEBUG(TEXT("Draw At %s, Extent %s"), *Location.ToString(), *Box->GetScaledBoxExtent().ToString());
-	DrawDebugBox(GetWorld(), Location, Box->GetScaledBoxExtent(), FColor::Red, true);
+	LOGDEBUG(TEXT("Draw At %s, Extent*2 = %s"), *Location.ToString(), *Box->GetScaledBoxExtent().ToString());
+	DrawDebugBox(GetWorld(), Location, Box->GetScaledBoxExtent() / 2, FColor::Red, true);
 
 
-	const auto PosX = Location.X;
-	// ForEachGrid([PosX, this](float i, float j) {
-	// 	auto* Actor = this->GetWorld()->SpawnActor<ABasicGrid>(FVector(PosX, j, i), {});
-	// 	Actor->StaticMeshComponent->SetStaticMesh(this->GridMesh);
-	// 	});
+	if (IsValid(GridType))
+	{
+		LOGDEBUG(TEXT("Grid Type is %s"), *GridType->GetName());
+		Board2D->ForEachGrid([Location, this](float i, float j) {
+			FVector Translation = FVector(Location.X, j, i) + Location;
+			auto* Actor = this->GetWorld()->SpawnActor(*GridType, &Translation);
+			if (auto *Grid = Cast<ABasicGrid>(Actor))
+			{
+				Grid->AdaptiveResize(FVector2f(Board2D->GetGridSize()));
+			}
+			});
+	}
 
 }
 

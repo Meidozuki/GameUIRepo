@@ -7,7 +7,6 @@
 ABasicGrid::ABasicGrid()
 {
 	PrimaryActorTick.bCanEverTick = true;
-	AlignPosition = 0.f;
 
 	StaticMeshComponent = CreateDefaultSubobject<UStaticMeshComponent>("StaticMesh");
 	SetRootComponent(StaticMeshComponent);
@@ -24,5 +23,9 @@ void ABasicGrid::BeginPlay()
 void ABasicGrid::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
+}
+
+void ABasicGrid::AdaptiveResize_Implementation(FVector2f GridSize)
+{
 }
 

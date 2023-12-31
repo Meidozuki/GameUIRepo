@@ -12,22 +12,20 @@ class TPSGAME_API UBoard2DComponent : public USceneComponent
 {
 	GENERATED_BODY()
 public:
-	using FVector2D = FVector2f;
+	using FVector2 = FVector2f;
 
 	// uproprty和ufunction无法使用using
 	UPROPERTY(BlueprintReadWrite, EditAnywhere, meta=(ClampMin="0.01"))
-	FVector2D GridRange;
+	FVector2f GridRange;
 	
 private:
-	FVector2D GridSize;
-	FVector2D GridBegin, GridEnd;
+	FVector2 GridSize;
+	FVector2 GridBegin, GridEnd;
 
 	void Init();
 
 	// inline float GetGridSizeX() const { return GridSize.X; }
 	// inline float GetGridSizeY() const { return GridSize.Y; }
-
-	void ForEachGrid(TFunction<void(float, float)> Func);
 	
 public:
 	// Sets default values for this component's properties
@@ -39,11 +37,18 @@ protected:
 public:
 	// virtual void TickComponent(float DeltaTime, ELevelTick TickType,
 	//                            FActorComponentTickFunction* ThisTickFunction) override;
-	
+
+	const FVector2& GetGridSize() const { return GridSize;}
+
 	UFUNCTION(BlueprintCallable)
-	bool IsInBoard(FVector2D InLocation) const;
+	void flush() { Init();}
+
+	void ForEachGrid(TFunction<void(float, float)> Func);
 	
-	UFUNCTION(BlueprintCallable)
-	FVector2D AlignGridLocation(FVector2D InLocation) const;
+	//UFUNCTION(BlueprintCallable)
+	bool IsInBoard(FVector2 InLocation) const;
+	
+	//UFUNCTION(BlueprintCallable)
+	FVector2 AlignGridLocation(FVector2 InLocation) const;
 	
 };

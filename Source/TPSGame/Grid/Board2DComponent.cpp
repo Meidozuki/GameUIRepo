@@ -3,7 +3,8 @@
 
 #include "Board2DComponent.h"
 
-// #include "QuickLog.h"
+#include "QuickLog.h"
+#include "UtilFuncLibrary.h"
 #include "Config/GlobalConfigLibrary.h"
 
 
@@ -27,8 +28,9 @@ void UBoard2DComponent::Init()
 	float GridX = ReadGridSize(TEXT("GridSizeX"));
 	float GridY = ReadGridSize(TEXT("GridSizeY"));
 	GridSize = { GridX, GridY };
-
-	auto&& Location = GetComponentLocation();
+	
+	auto&& Location = UUtilityFunctionLibrary::RotateScreenToXYSpace(GetRelativeLocation());
+	LOGDEBUG(TEXT("Board2D location %s"), *Location.ToString());
 	FVector2f XY(Location.X, Location.Y);
 
 	GridBegin = XY - GridRange / 2;
@@ -56,13 +58,13 @@ void UBoard2DComponent::BeginPlay()
 	
 }
 
-bool UBoard2DComponent::IsInBoard(FVector2D InLocation) const
+bool UBoard2DComponent::IsInBoard(FVector2 InLocation) const
 {
 	return InLocation.ComponentwiseAllGreaterThan(GridBegin) &&\
 		InLocation.ComponentwiseAllLessThan(GridEnd);
 }
 
-UBoard2DComponent::FVector2D UBoard2DComponent::AlignGridLocation(FVector2D InLocation) const
+UBoard2DComponent::FVector2 UBoard2DComponent::AlignGridLocation(FVector2 InLocation) const
 {
 	float GridX = GridSize.X, GridY = GridSize.Y;
 	
